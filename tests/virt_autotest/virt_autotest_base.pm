@@ -19,6 +19,7 @@ use testapi;
 use Data::Dumper;
 use XML::Writer;
 use IO::File;
+use virt_utils;
 
 sub analyzeResult {
     die "You need to overload analyzeResult in your class";
@@ -153,6 +154,12 @@ sub run_test {
     }
 
     my $test_cmd      = $self->get_script_run();
+    #FOR S390X LPAR
+    if (check_var('ARCH', 's390x')) {
+        record_info('INFO', 'Do Guest Installation');
+        lpar_cmd("$test_cmd");
+        return;
+    }
     my $script_output = $self->execute_script_run($test_cmd, $timeout);
 
     if ($add_junit_log_flag eq "yes") {

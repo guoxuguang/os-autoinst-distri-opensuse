@@ -22,6 +22,19 @@ sub reboot_and_wait_up {
     my $self           = shift;
     my $reboot_timeout = shift;
 
+    if (check_var('ARCH', 's390x')) {
+        record_info('INFO', 'Do Reboot LPAR');
+        #type reboot
+        my $cmd = "reboot -f\n";
+        type_string "$cmd";
+        #Wait for s390x lpar bootup
+        sleep 120;
+        #Switch to s390x lpar console
+        reset_consoles;
+        my $svirt = select_console('svirt', await_console => 0);
+        return;
+    }
+
     if (get_var("PROXY_MODE")) {
         select_console('root-console');
         my $test_machine = get_var("TEST_MACHINE");
