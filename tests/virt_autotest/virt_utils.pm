@@ -26,7 +26,7 @@ use virt_autotest_base;
 use version_utils 'is_sle';
 
 our @EXPORT
-  = qw(update_guest_configurations_with_daily_build repl_addon_with_daily_build_module_in_files repl_module_in_sourcefile handle_sp_in_settings handle_sp_in_settings_with_fcs handle_sp_in_settings_with_sp0 clean_up_red_disks);
+  = qw(update_guest_configurations_with_daily_build repl_addon_with_daily_build_module_in_files repl_module_in_sourcefile handle_sp_in_settings handle_sp_in_settings_with_fcs handle_sp_in_settings_with_sp0 clean_up_red_disks lpar_cmd lpar_cmd_with_retry);
 
 sub get_version_for_daily_build_guest {
     my $version = '';
@@ -48,14 +48,26 @@ sub repl_repo_in_sourcefile {
     my $verorig = "source.http.sles-" . get_version_for_daily_build_guest . "-64";
     my $veritem = check_var('ARCH', 'x86_64') ? $verorig : get_required_var('ARCH') . ".$verorig";
     if (get_var("REPO_0")) {
-        my $location = &virt_autotest_base::execute_script_run("", "perl /usr/share/qa/tools/location_detect_impl.pl", 60);
-        $location =~ s/[\r\n]+$//;
+	my $location = "";
+	if (check_var('ARCH', 's390x')) {
+            my $location = type_string("perl /usr/share/qa/tools/location_detect_impl.pl\n");
+        }
+	else{
+            my $location = &virt_autotest_base::execute_script_run("", "perl /usr/share/qa/tools/location_detect_impl.pl", 60);
+            $location =~ s/[\r\n]+$//;
+	}
         my $soucefile = "/usr/share/qa/virtautolib/data/" . "sources." . "$location";
         my $newrepo   = "http://openqa.suse.de/assets/repo/" . get_var("REPO_0");
         my $shell_cmd
           = "if grep $veritem $soucefile >> /dev/null;then sed -i \"s#^$veritem=.*#$veritem=$newrepo#\" $soucefile;else echo \"$veritem=$newrepo\" >> $soucefile;fi";
-        assert_script_run($shell_cmd);
-        assert_script_run("grep \"$veritem\" $soucefile");
+        if (check_var('ARCH', 's390x')) {
+            lpar_cmd("$shell_cmd");
+            lpar_cmd("grep \"$veritem\" $soucefile");
+        }
+        else{
+            assert_script_run($shell_cmd);
+            assert_script_run("grep \"$veritem\" $soucefile");
+        }
     }
     else {
         print "Do not need to change resource for $veritem item\n";
@@ -78,11 +90,18 @@ sub repl_module_in_sourcefile {
     my $source_file = "/usr/share/qa/virtautolib/data/sources.*";
     my $command     = "sed -ri 's#^(${replaced_item}).*\$#\\1$daily_build_module#g' $source_file";
     print "Debug: the command to execute is:\n$command \n";
-    assert_script_run($command);
-    save_screenshot;
-    assert_script_run("grep Module $source_file -r");
-    save_screenshot;
-    upload_logs "/usr/share/qa/virtautolib/data/sources.de";
+    if (check_var('ARCH', 's390x')) {
+        lpar_cmd("$command");
+        lpar_cmd("grep Module $source_file -r");
+        upload_asset"/usr/share/qa/virtautolib/data/sources.de", 1, 1;
+    }
+    else{
+        assert_script_run($command);
+        save_screenshot;
+        assert_script_run("grep Module $source_file -r");
+        save_screenshot;
+        upload_logs "/usr/share/qa/virtautolib/data/sources.de";
+    }
 }
 
 sub repl_addon_with_daily_build_module_in_files {
@@ -196,6 +215,61 @@ sub clean_up_red_disks {
     }
     my $disks_fs_overview = script_output($get_disks_fs_overview, $wait_script, type_command => 1, proceed_on_failure => 1);
     diag("Debug info: Disks and File Systems Overview:\n $disks_fs_overview");
+}
+
+sub lpar_cmd {
+    my ($cmd, $mesg, $args) = @_;
+    die 'Command not provided' unless $cmd;
+    my $mesg = shift;
+
+    $args->{ignore_return_code} ||= 0;
+    my $ret = console('svirt')->run_cmd($cmd);
+    if ($ret == 0){
+        diag "Command $mesg on S390X LPAR returned: SUCESS";
+    }
+    unless ($args->{ignore_return_code} || !$ret) {
+        diag "Command $mesg on S390X LPAR returned: FAIL";
+        die 'Find new failure, please check manually';
+    }
+}
+
+sub lpar_cmd_with_retry {
+    my ($cmd, $args) = @_;
+    die 'Command not provided' unless $cmd;
+
+    my $attempts = $args->{attempts} // 3;
+    my $sleep    = $args->{sleep}    // 30;
+    # Common messages
+    my @msgs = $args->{msgs} // (
+        'All repositories have been refreshed.',
+        'Need to reboot system to make the rpms work!');
+    for my $retry (1 .. $attempts) {
+        my @out = (console('svirt')->get_cmd_output($cmd, {wantarray => 1}))[0];
+        my $stderr = $out[0][1] || '';
+        chomp($stderr);
+        # Command succeeded, we are done here
+        return unless $stderr;
+        diag "Attempt $retry/$attempts: Command failed";
+        my $msg_found = 0;
+        foreach my $msg (@msgs) {
+            diag "Looking for message: '$msg'";
+            # Narrow the error message for an easy match
+            my $s = $stderr;
+            # Remove Windows-style new lines (<CR><LF>)
+            $s =~ s{\r\n}{}g;
+            # Error message is not the expected error message in this cycle,
+            # try the next one
+            next unless $s =~ /$msg/;
+            $msg_found = 1;
+            # Error message is the expected one, sleep
+            diag "Sleeping for $sleep seconds...";
+            sleep $sleep;
+            last;
+        }
+        # Error we don't know if we should attempt to recover from
+        die 'Command failed with unhandled error' unless $msg_found;
+    }
+    die 'Run out of attempts';
 }
 
 1;
