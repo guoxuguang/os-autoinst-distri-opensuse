@@ -788,6 +788,7 @@ elsif (get_var("VIRT_AUTOTEST")) {
         #loadtest "virt_autotest/set_config_as_glue";
         #loadtest "virt_autotest/virsh_internal_snapshot";
         #loadtest "virt_autotest/virsh_external_snapshot";
+        #loadtest "virt_autotest/virsh_virtual_network";
     }
     elsif (get_var("VIRT_PRJ2_HOST_UPGRADE")) {
         loadtest "virt_autotest/host_upgrade_generate_run_file";
