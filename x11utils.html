@@ -24,6 +24,7 @@
       <li><a href="#select_user_gnome">select_user_gnome</a></li>
       <li><a href="#turn_off_plasma_screen_energysaver">turn_off_plasma_screen_energysaver</a></li>
       <li><a href="#turn_off_plasma_screenlocker">turn_off_plasma_screenlocker</a></li>
+      <li><a href="#turn_off_plasma_tooltips">turn_off_plasma_tooltips</a></li>
       <li><a href="#turn_off_kde_screensaver">turn_off_kde_screensaver</a></li>
       <li><a href="#turn_off_gnome_screensaver">turn_off_gnome_screensaver</a></li>
       <li><a href="#turn_off_gnome_screensaver_for_gdm">turn_off_gnome_screensaver_for_gdm</a></li>
@@ -33,6 +34,8 @@
       <li><a href="#untick_welcome_on_next_startup">untick_welcome_on_next_startup</a></li>
       <li><a href="#handle_welcome_screen">handle_welcome_screen</a></li>
       <li><a href="#start_root_shell_in_xterm">start_root_shell_in_xterm</a></li>
+      <li><a href="#x11_start_program_xterm">x11_start_program_xterm</a></li>
+      <li><a href="#default_gui_terminal">default_gui_terminal {</a></li>
       <li><a href="#handle_gnome_activities">handle_gnome_activities</a></li>
     </ul>
   </li>
@@ -98,9 +101,15 @@
 
 <h2 id="turn_off_plasma_screenlocker">turn_off_plasma_screenlocker</h2>
 
-<pre><code>turnoff_plasma_screenlocker()</code></pre>
+<pre><code>turn_off_plasma_screenlocker()</code></pre>
 
 <p>Turns off the Plasma desktop screenlocker.</p>
+
+<h2 id="turn_off_plasma_tooltips">turn_off_plasma_tooltips</h2>
+
+<pre><code>turn_off_plasma_tooltips()</code></pre>
+
+<p>Disable Plasma tooltips, especially the one triggered by the &quot;Peek Desktop&quot; below the default mouse_hide location can break needles and break or slow down matches.</p>
 
 <h2 id="turn_off_kde_screensaver">turn_off_kde_screensaver</h2>
 
@@ -156,6 +165,18 @@
  </code></pre>
 
 <p>Start a root shell in xterm.</p>
+
+<h2 id="x11_start_program_xterm">x11_start_program_xterm</h2>
+
+<pre><code>x11_start_program_xterm()</code></pre>
+
+<p>Start xterm, if it is not focused, record a soft-failure and focus the xterm window.</p>
+
+<h2 id="default_gui_terminal">default_gui_terminal {</h2>
+
+<pre><code>default_gui_terminal()</code></pre>
+
+<p>Returns the default console to be used by test modules, defaults to xterm</p>
 
 <h2 id="handle_gnome_activities">handle_gnome_activities</h2>
 

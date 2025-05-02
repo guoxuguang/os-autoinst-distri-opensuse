@@ -21,10 +21,13 @@
       <li><a href="#check12qtbug">check12qtbug</a></li>
       <li><a href="#go_to_patterns">go_to_patterns</a></li>
       <li><a href="#go_to_search_packages">go_to_search_packages</a></li>
+      <li><a href="#go_to_security_settings">go_to_security_settings</a></li>
       <li><a href="#move_down">move_down</a></li>
       <li><a href="#process_patterns">process_patterns</a></li>
       <li><a href="#search_package">search_package</a></li>
       <li><a href="#select_all_patterns_by_menu">select_all_patterns_by_menu</a></li>
+      <li><a href="#select_not_install_any_pattern">select_not_install_any_pattern</a></li>
+      <li><a href="#select_visible_unselected_patterns">select_visible_unselected_patterns</a></li>
       <li><a href="#deselect_pattern">deselect_pattern</a></li>
       <li><a href="#select_specific_patterns_by_iteration">select_specific_patterns_by_iteration</a></li>
       <li><a href="#switch_selection">switch_selection</a></li>
@@ -81,6 +84,12 @@
 
 <p>Performs steps needed to go from the &quot;pattern selection&quot; screen to &quot;search packages&quot; screen.</p>
 
+<h2 id="go_to_security_settings">go_to_security_settings</h2>
+
+<pre><code>go_to_security_settings();</code></pre>
+
+<p>From the installation overview screen, open the security settings.</p>
+
 <h2 id="move_down">move_down</h2>
 
 <pre><code>move_down();</code></pre>
@@ -104,6 +113,18 @@
 <pre><code>select_all_patterns_by_menu();</code></pre>
 
 <p>Being in the &quot;select pattern&quot; screen, performs steps needed to select all available patterns.</p>
+
+<h2 id="select_not_install_any_pattern">select_not_install_any_pattern</h2>
+
+<pre><code>select_not_install_any_pattern() </code></pre>
+
+<p>Being in the &quot;select pattern&quot; screen, performs steps to not install any patterns.</p>
+
+<h2 id="select_visible_unselected_patterns">select_visible_unselected_patterns</h2>
+
+<pre><code>select_visible_unselected_patterns([@patterns])</code></pre>
+
+<p>Being in the &quot;select pattern&quot; screen, performs steps to select visible patterns.</p>
 
 <h2 id="deselect_pattern">deselect_pattern</h2>
 
